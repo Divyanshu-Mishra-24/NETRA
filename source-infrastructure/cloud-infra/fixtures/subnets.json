@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "SubnetId": "subnet-0e2cf0db3246cbf5a",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "CidrBlock": "10.0.1.0/24",
+    "AvailabilityZone": "ap-south-1a",
+    "MapPublicIpOnLaunch": true,
+    "State": "available",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-public-a" },
+      { "Key": "Tier", "Value": "public" }
+    ]
+  },
+  {
+    "SubnetId": "subnet-074da1ea0e2ad430e",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "CidrBlock": "10.0.2.0/24",
+    "AvailabilityZone": "ap-south-1a",
+    "MapPublicIpOnLaunch": false,
+    "State": "available",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-application-a" },
+      { "Key": "Tier", "Value": "application" }
+    ]
+  },
+  {
+    "SubnetId": "subnet-0af47ff4bfdbdf4b1",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "CidrBlock": "10.0.3.0/24",
+    "AvailabilityZone": "ap-south-1a",
+    "MapPublicIpOnLaunch": false,
+    "State": "available",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-database-a" },
+      { "Key": "Tier", "Value": "database" }
+    ]
+  },
+  {
+    "SubnetId": "subnet-0efc7231a31356199",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "CidrBlock": "10.0.4.0/24",
+    "AvailabilityZone": "ap-south-1b",
+    "MapPublicIpOnLaunch": false,
+    "State": "available",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-database-b" },
+      { "Key": "Tier", "Value": "database" }
+    ]
+  }
+]
