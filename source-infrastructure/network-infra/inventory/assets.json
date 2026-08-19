@@ -1,1 +1,6 @@
-[]
+[
+  { "id": "internet", "name": "Internet", "type": "external", "ip": null, "ports": [], "exposure": "external", "criticality": "low" },
+  { "id": "web-01", "name": "Nginx Web Server", "type": "web_server", "ip": "docker:web", "ports": [80], "exposure": "public", "criticality": "medium" },
+  { "id": "api-01", "name": "FastAPI Server", "type": "api_server", "ip": "docker:api", "ports": [8000], "exposure": "internal", "criticality": "high" },
+  { "id": "db-01", "name": "PostgreSQL Database", "type": "database", "ip": "docker:source-db", "ports": [5432], "exposure": "private", "criticality": "critical" }
+]

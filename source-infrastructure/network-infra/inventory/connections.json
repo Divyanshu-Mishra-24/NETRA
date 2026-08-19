@@ -1,1 +1,5 @@
-[]
+[
+  { "source": "internet", "target": "web-01", "protocol": "tcp", "port": 8080, "allowed": true, "evidence": "compose host port 8080:80" },
+  { "source": "web-01", "target": "api-01", "protocol": "tcp", "port": 8000, "allowed": true, "evidence": "shared app_net" },
+  { "source": "api-01", "target": "db-01", "protocol": "tcp", "port": 5432, "allowed": true, "evidence": "shared data_net" }
+]
