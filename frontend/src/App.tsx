@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Dashboard from './pages/Dashboard';
+import CloudTwin from './pages/CloudTwin';
 import NetworkTwin from './pages/NetworkTwin';
 
 export default function App() {
@@ -11,5 +12,7 @@ export default function App() {
     return () => window.removeEventListener('hashchange', updateRoute);
   }, []);
 
-  return route === '#network-twin' ? <NetworkTwin /> : <Dashboard />;
+  if (route === '#network-twin') return <NetworkTwin />;
+  if (route === '#cloud-twin') return <CloudTwin />;
+  return <Dashboard />;
 }
