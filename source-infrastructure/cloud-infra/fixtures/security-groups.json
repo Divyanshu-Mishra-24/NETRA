@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "GroupId": "sg-0c7491edebd05f9f7",
+    "GroupName": "web-sg",
+    "Description": "NETRA web tier - public HTTP",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "IpPermissions": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": 80,
+        "ToPort": 80,
+        "IpRanges": [
+          { "CidrIp": "0.0.0.0/0", "Description": "Public web access" }
+        ],
+        "UserIdGroupPairs": []
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": 22,
+        "ToPort": 22,
+        "IpRanges": [
+          { "CidrIp": "0.0.0.0/0", "Description": "SSH access" }
+        ],
+        "UserIdGroupPairs": []
+      }
+    ],
+    "IpPermissionsEgress": [
+      {
+        "IpProtocol": "-1",
+        "IpRanges": [{ "CidrIp": "0.0.0.0/0" }],
+        "UserIdGroupPairs": []
+      }
+    ],
+    "Tags": [
+      { "Key": "Name", "Value": "web-sg" }
+    ]
+  },
+  {
+    "GroupId": "sg-0cc3bee0308ca9e18",
+    "GroupName": "api-sg",
+    "Description": "NETRA API tier - from web only",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "IpPermissions": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": 8000,
+        "ToPort": 8000,
+        "IpRanges": [],
+        "UserIdGroupPairs": [
+          { "GroupId": "sg-0c7491edebd05f9f7", "Description": "API from web tier" }
+        ]
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": 22,
+        "ToPort": 22,
+        "IpRanges": [
+          { "CidrIp": "0.0.0.0/0", "Description": "SSH access" }
+        ],
+        "UserIdGroupPairs": []
+      }
+    ],
+    "IpPermissionsEgress": [
+      {
+        "IpProtocol": "-1",
+        "IpRanges": [{ "CidrIp": "0.0.0.0/0" }],
+        "UserIdGroupPairs": []
+      }
+    ],
+    "Tags": [
+      { "Key": "Name", "Value": "api-sg" }
+    ]
+  },
+  {
+    "GroupId": "sg-08208b77356d7cb2a",
+    "GroupName": "database-sg",
+    "Description": "NETRA database tier - from API only",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "IpPermissions": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": 5432,
+        "ToPort": 5432,
+        "IpRanges": [],
+        "UserIdGroupPairs": [
+          { "GroupId": "sg-0cc3bee0308ca9e18", "Description": "DB from API tier" }
+        ]
+      }
+    ],
+    "IpPermissionsEgress": [
+      {
+        "IpProtocol": "-1",
+        "IpRanges": [{ "CidrIp": "0.0.0.0/0" }],
+        "UserIdGroupPairs": []
+      }
+    ],
+    "Tags": [
+      { "Key": "Name", "Value": "database-sg" }
+    ]
+  }
+]

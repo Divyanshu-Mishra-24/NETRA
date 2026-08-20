@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "CidrBlock": "10.0.0.0/16",
+    "State": "available",
+    "OwnerId": "netra-account",
+    "InstanceTenancy": "default",
+    "IsDefault": false,
+    "Tags": [
+      { "Key": "Name", "Value": "netra-vpc" },
+      { "Key": "Project", "Value": "NETRA" }
+    ]
+  }
+]

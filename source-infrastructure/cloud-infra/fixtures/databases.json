@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "DBInstanceIdentifier": "netra-db",
+    "DBInstanceClass": "db.t3.micro",
+    "Engine": "postgres",
+    "EngineVersion": "15.4",
+    "DBInstanceStatus": "available",
+    "MasterUsername": "netra_admin",
+    "Endpoint": {
+      "Address": "netra-db.c1wagqe646o6.ap-south-1.rds.amazonaws.com",
+      "Port": 5432
+    },
+    "DBSubnetGroup": {
+      "DBSubnetGroupName": "netra-db-subnet-group",
+      "VpcId": "vpc-0ddb37d784b88bc5b",
+      "Subnets": [
+        {
+          "SubnetIdentifier": "subnet-0af47ff4bfdbdf4b1",
+          "SubnetAvailabilityZone": { "Name": "ap-south-1a" }
+        },
+        {
+          "SubnetIdentifier": "subnet-0efc7231a31356199",
+          "SubnetAvailabilityZone": { "Name": "ap-south-1b" }
+        }
+      ]
+    },
+    "VpcSecurityGroups": [
+      { "VpcSecurityGroupId": "sg-08208b77356d7cb2a", "Status": "active" }
+    ],
+    "PubliclyAccessible": false,
+    "StorageType": "gp2",
+    "AllocatedStorage": 20,
+    "Tags": [
+      { "Key": "Name", "Value": "netra-db" },
+      { "Key": "Project", "Value": "NETRA" }
+    ]
+  }
+]

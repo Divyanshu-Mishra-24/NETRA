@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "InstanceId": "i-048b980204a59d506",
+    "InstanceType": "t2.micro",
+    "ImageId": "ami-0c2b8ca1dad447f8a",
+    "State": { "Name": "running", "Code": 16 },
+    "PrivateIpAddress": "10.0.1.201",
+    "PublicIpAddress": "13.234.77.150",
+    "SubnetId": "subnet-0e2cf0db3246cbf5a",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "SecurityGroups": [
+      { "GroupId": "sg-0c7491edebd05f9f7", "GroupName": "web-sg" }
+    ],
+    "Placement": { "AvailabilityZone": "ap-south-1a" },
+    "Platform": "linux",
+    "Architecture": "x86_64",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-web" },
+      { "Key": "Role", "Value": "web-server" }
+    ]
+  },
+  {
+    "InstanceId": "i-0068228c59ffb2fce",
+    "InstanceType": "t2.micro",
+    "ImageId": "ami-0c2b8ca1dad447f8a",
+    "State": { "Name": "running", "Code": 16 },
+    "PrivateIpAddress": "10.0.2.26",
+    "PublicIpAddress": null,
+    "SubnetId": "subnet-074da1ea0e2ad430e",
+    "VpcId": "vpc-0ddb37d784b88bc5b",
+    "SecurityGroups": [
+      { "GroupId": "sg-0cc3bee0308ca9e18", "GroupName": "api-sg" }
+    ],
+    "Placement": { "AvailabilityZone": "ap-south-1a" },
+    "Platform": "linux",
+    "Architecture": "x86_64",
+    "Tags": [
+      { "Key": "Name", "Value": "netra-api" },
+      { "Key": "Role", "Value": "api-server" }
+    ]
+  }
+]
