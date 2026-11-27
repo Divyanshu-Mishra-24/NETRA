@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.neo4j import Neo4jError, ServiceUnavailable, neo4j_db
-from app.routers import assets, graph, simulations
+from app.routers import assets, graph, simulations, vulnerabilities
 from app.services.graph_service import ensure_constraints
 
 load_dotenv()
@@ -60,6 +60,7 @@ app.add_middleware(
 app.include_router(assets.router)
 app.include_router(graph.router)
 app.include_router(simulations.router)
+app.include_router(vulnerabilities.router)
 
 
 @app.get("/health")

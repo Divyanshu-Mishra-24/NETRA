@@ -17,6 +17,10 @@ class AssetBase(BaseModel):
     ports: List[int] = Field(default_factory=list)
     exposure: Optional[str] = Field(default=None, max_length=50)
     criticality: Optional[str] = Field(default=None, max_length=50)
+    software: List[dict[str, Any]] = Field(default_factory=list)
+    risk_score: Optional[float] = Field(default=None, ge=0, le=100)
+    risk_level: Optional[str] = Field(default=None, max_length=20)
+    risk_calculated_at: Optional[str] = None
 
 
 class AssetCreate(AssetBase):
@@ -33,6 +37,7 @@ class AssetUpdate(BaseModel):
     ports: Optional[List[int]] = None
     exposure: Optional[str] = Field(default=None, max_length=50)
     criticality: Optional[str] = Field(default=None, max_length=50)
+    software: Optional[List[dict[str, Any]]] = None
 
 
 class Asset(AssetBase):

@@ -24,8 +24,9 @@ function shortLabel(value: string | null | undefined): string {
 function AssetNodeCard({ data, selected }: NodeProps<AssetFlowNode>) {
   const criticality = String(data.criticality || 'unknown').toLowerCase();
   const exposure = String(data.exposure || 'unknown').toLowerCase();
+  const riskLevel = String(data.risk_level || '').toLowerCase();
   return (
-    <div className={`graph-node-card criticality-${criticality}${selected ? ' selected' : ''}`}>
+    <div className={`graph-node-card risk-${riskLevel || 'unknown'} criticality-${criticality}${selected ? ' selected' : ''}`}>
       <div className="graph-node-header">
         <span className="graph-node-kind">{String(data.type || 'asset')}</span>
         <span className={`graph-node-badge exposure-${exposure}`}>{String(data.exposure || 'unknown')}</span>
@@ -38,6 +39,10 @@ function AssetNodeCard({ data, selected }: NodeProps<AssetFlowNode>) {
       <div className="graph-node-meta">
         <span>Ports: {Array.isArray(data.ports) && data.ports.length ? data.ports.join(', ') : 'none'}</span>
         <span className={`criticality-text ${criticality}`}>{String(data.criticality || 'unknown')}</span>
+      </div>
+      <div className="graph-node-meta">
+        <span>Risk: {data.risk_score != null ? `${data.risk_score}/100` : 'unavailable'}</span>
+        <span className={`risk-text ${riskLevel || 'unknown'}`}>{riskLevel || 'unknown'}</span>
       </div>
     </div>
   );
@@ -119,10 +124,10 @@ export default function InfrastructureGraph({ nodes, edges, selectedAssetId, onS
           zoomable
           nodeColor={(node) => {
             const data = (node.data || {}) as Partial<Asset>;
-            const criticality = String(data.criticality || '').toLowerCase();
-            if (criticality === 'critical') return '#ed8b74';
-            if (criticality === 'high') return '#f0c478';
-            if (criticality === 'medium') return '#4cc8b0';
+            const risk = String(data.risk_level || '').toLowerCase();
+            if (risk === 'high') return '#ed8b74';
+            if (risk === 'medium') return '#f0c478';
+            if (risk === 'low') return '#4cc8b0';
             return '#7e99b2';
           }}
           maskColor="rgba(6, 19, 27, 0.7)"

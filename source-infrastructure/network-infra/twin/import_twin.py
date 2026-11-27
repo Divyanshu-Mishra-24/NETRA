@@ -52,6 +52,7 @@ def import_inventory(session, assets, connections):
         asset.ports = $ports,
         asset.exposure = $exposure,
         asset.criticality = $criticality,
+        asset.software = $software,
         asset.source = 'network-fixture'
     """
     for asset in assets:
@@ -65,6 +66,7 @@ def import_inventory(session, assets, connections):
             ports=asset.get("ports", []),
             exposure=asset.get("exposure"),
             criticality=asset.get("criticality"),
+            software=asset.get("software", []),
         )
 
     connection_query = """
