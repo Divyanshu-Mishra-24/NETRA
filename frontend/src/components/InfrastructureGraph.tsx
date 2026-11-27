@@ -69,9 +69,14 @@ function edgeLabel(edge: GraphEdge): string {
   return `${protocol}${port}`;
 }
 
-function toFlowEdge(edge: GraphEdge): ConnectionFlowEdge {
+function toFlowEdge(
+  edge: GraphEdge,
+  highlightedEdgeIds: string[] = [],
+  highlightActive = false,
+): ConnectionFlowEdge {
   const allowed = edge.data?.allowed;
   const stroke = allowed === false ? '#ed8b74' : '#4cc8b0';
+  const highlighted = highlightedEdgeIds.includes(edge.id);
   return {
     id: edge.id,
     source: edge.source,
@@ -81,7 +86,11 @@ function toFlowEdge(edge: GraphEdge): ConnectionFlowEdge {
     data: edge.data,
     animated: allowed === true,
     markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
-    style: { stroke, strokeWidth: 2 },
+    style: {
+      stroke: highlightActive && highlighted ? '#69e2cc' : stroke,
+      strokeWidth: highlightActive && highlighted ? 4 : 2,
+      opacity: highlightActive && !highlighted ? 0.18 : 1,
+    },
     labelStyle: { fill: '#d6ebe5', fontSize: 10, fontWeight: 600 },
     labelBgStyle: { fill: '#0a242b', fillOpacity: 0.9 },
     labelBgPadding: [4, 2],
@@ -94,11 +103,28 @@ interface InfrastructureGraphProps {
   edges: GraphEdge[];
   selectedAssetId: string | null;
   onSelectAsset: (assetId: string | null) => void;
+  highlightedNodeIds?: string[];
+  highlightedEdgeIds?: string[];
+  highlightActive?: boolean;
 }
 
-export default function InfrastructureGraph({ nodes, edges, selectedAssetId, onSelectAsset }: InfrastructureGraphProps) {
-  const flowNodes = useMemo(() => toFlowNodes(nodes, selectedAssetId), [nodes, selectedAssetId]);
-  const flowEdges = useMemo(() => edges.map(toFlowEdge), [edges]);
+export default function InfrastructureGraph({
+  nodes,
+  edges,
+  selectedAssetId,
+  onSelectAsset,
+  highlightedNodeIds = [],
+  highlightedEdgeIds = [],
+  highlightActive = false,
+}: InfrastructureGraphProps) {
+  const flowNodes = useMemo(
+    () => toFlowNodes(nodes, selectedAssetId, highlightedNodeIds, highlightActive),
+    [nodes, selectedAssetId, highlightedNodeIds, highlightActive],
+  );
+  const flowEdges = useMemo(
+    () => edges.map((edge) => toFlowEdge(edge, highlightedEdgeIds, highlightActive)),
+    [edges, highlightedEdgeIds, highlightActive],
+  );
 
   const onNodeClick: NodeMouseHandler = (_, node) => {
     onSelectAsset(node.id);
@@ -138,10 +164,18 @@ export default function InfrastructureGraph({ nodes, edges, selectedAssetId, onS
   );
 }
 
-function toFlowNodes(nodes: GraphNode[], selectedAssetId: string | null): AssetFlowNode[] {
+function toFlowNodes(
+  nodes: GraphNode[],
+  selectedAssetId: string | null,
+  highlightedNodeIds: string[],
+  highlightActive: boolean,
+): AssetFlowNode[] {
   return nodes.map((node) => ({
     ...toFlowNode(node),
     selected: node.id === selectedAssetId,
+    style: highlightActive && !highlightedNodeIds.includes(node.id)
+      ? { opacity: 0.28 }
+      : { opacity: 1 },
   }));
 }
 

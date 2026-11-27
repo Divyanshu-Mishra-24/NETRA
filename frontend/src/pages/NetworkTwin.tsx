@@ -8,11 +8,15 @@ import {
   createConnection,
   getGraph,
   getRiskSummary,
+  getAttackPaths,
+  simulateCompromise,
   type Asset,
   type AssetCreateInput,
   type GraphEdge,
   type GraphNode,
   type RiskSummary,
+  type AttackPathResponse,
+  type PropagationResult,
 } from '../services/api';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
@@ -85,6 +89,17 @@ export default function NetworkTwin() {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [riskSummary, setRiskSummary] = useState<RiskSummary | null>(null);
+  const [entryAssetId, setEntryAssetId] = useState('');
+  const [targetAssetId, setTargetAssetId] = useState('');
+  const [attackPaths, setAttackPaths] = useState<AttackPathResponse | null>(null);
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+  const [propagation, setPropagation] = useState<PropagationResult | null>(null);
+  const [simulationAssetId, setSimulationAssetId] = useState('');
+  const [attackBusy, setAttackBusy] = useState(false);
+  const [attackError, setAttackError] = useState<string | null>(null);
+  const [highlightNodeIds, setHighlightNodeIds] = useState<string[]>([]);
+  const [highlightEdgeIds, setHighlightEdgeIds] = useState<string[]>([]);
+  const [highlightActive, setHighlightActive] = useState(false);
 
   const [assetForm, setAssetForm] = useState<AssetFormState>(initialAssetForm);
   const [connectionForm, setConnectionForm] = useState<ConnectionFormState>(initialConnectionForm);
@@ -222,6 +237,80 @@ export default function NetworkTwin() {
     }
   };
 
+  const analyzeAttackPaths = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!entryAssetId || !targetAssetId) {
+      setAttackError('Select both an entry asset and a target asset.');
+      return;
+    }
+    setAttackBusy(true);
+    setAttackError(null);
+    setPropagation(null);
+    setHighlightActive(false);
+    try {
+      const result = await getAttackPaths(entryAssetId, targetAssetId);
+      setAttackPaths(result);
+      setSelectedPathId(result.shortest_path);
+      if (result.shortest_path) {
+        const shortest = result.paths.find((path) => path.path_id === result.shortest_path);
+        if (shortest) {
+          setHighlightNodeIds(shortest.assets);
+          setHighlightEdgeIds(shortest.edges.map((edge) => `${edge.source}->${edge.target}`));
+          setHighlightActive(true);
+        }
+      } else {
+        setHighlightNodeIds([]);
+        setHighlightEdgeIds([]);
+      }
+    } catch (error) {
+      setAttackError(errorText(error));
+      setAttackPaths(null);
+    } finally {
+      setAttackBusy(false);
+    }
+  };
+
+  const selectAttackPath = (pathId: string) => {
+    setSelectedPathId(pathId);
+    const path = attackPaths?.paths.find((item) => item.path_id === pathId);
+    if (!path) return;
+    setHighlightNodeIds(path.assets);
+    setHighlightEdgeIds(path.edges.map((edge) => `${edge.source}->${edge.target}`));
+    setHighlightActive(true);
+  };
+
+  const runCompromiseSimulation = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!simulationAssetId) {
+      setAttackError('Select a starting asset for the hypothetical simulation.');
+      return;
+    }
+    setAttackBusy(true);
+    setAttackError(null);
+    setAttackPaths(null);
+    try {
+      const result = await simulateCompromise(simulationAssetId);
+      setPropagation(result);
+      setHighlightNodeIds(result.affected_asset_ids);
+      setHighlightEdgeIds(result.traversed_connections.map((connection) => `${connection.source}->${connection.target}`));
+      setHighlightActive(true);
+    } catch (error) {
+      setAttackError(errorText(error));
+      setPropagation(null);
+    } finally {
+      setAttackBusy(false);
+    }
+  };
+
+  const resetAttackHighlight = () => {
+    setHighlightActive(false);
+    setHighlightNodeIds([]);
+    setHighlightEdgeIds([]);
+    setSelectedPathId(null);
+    setPropagation(null);
+    setAttackPaths(null);
+  };
+
   return (
     <main className="twin-shell">
       <header className="twin-header">
@@ -293,6 +382,9 @@ export default function NetworkTwin() {
                 edges={edges}
                 selectedAssetId={selectedAssetId}
                 onSelectAsset={setSelectedAssetId}
+                highlightedNodeIds={highlightNodeIds}
+                highlightedEdgeIds={highlightEdgeIds}
+                highlightActive={highlightActive}
               />
             ) : null}
           </div>
@@ -302,6 +394,92 @@ export default function NetworkTwin() {
             onClose={() => setSelectedAssetId(null)}
             onAssetUpdated={() => void loadGraph(true)}
           />
+        </section>
+
+        <section className="attack-analysis" aria-label="Attack Path Analysis">
+          <div className="action-card-header">
+            <p className="eyebrow">Hypothetical graph analysis</p>
+            <h2>Attack Path Analysis</h2>
+            <p>Deterministic directed reachability and compromise propagation. Results are not proof of exploitation.</p>
+          </div>
+          <div className="attack-controls">
+            <form className="twin-form" onSubmit={analyzeAttackPaths}>
+              <div className="form-grid">
+                <label>
+                  <span>Entry asset</span>
+                  <select value={entryAssetId} onChange={(event) => setEntryAssetId(event.target.value)} required>
+                    <option value="">Select entry asset</option>
+                    {assets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name} ({asset.id})</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>Target asset</span>
+                  <select value={targetAssetId} onChange={(event) => setTargetAssetId(event.target.value)} required>
+                    <option value="">Select target asset</option>
+                    {assets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name} ({asset.id})</option>)}
+                  </select>
+                </label>
+              </div>
+              <button type="submit" className="primary-btn" disabled={attackBusy || assets.length < 2}>
+                {attackBusy ? 'Analyzing…' : 'Analyze Attack Paths'}
+              </button>
+            </form>
+
+            <form className="twin-form" onSubmit={runCompromiseSimulation}>
+              <label>
+                <span>Hypothetical compromised starting asset</span>
+                <select value={simulationAssetId} onChange={(event) => setSimulationAssetId(event.target.value)} required>
+                  <option value="">Select starting asset</option>
+                  {assets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name} ({asset.id})</option>)}
+                </select>
+              </label>
+              <button type="submit" className="secondary-btn" disabled={attackBusy || assets.length === 0}>
+                {attackBusy ? 'Simulating…' : 'Simulate Compromise'}
+              </button>
+            </form>
+
+            <button type="button" className="secondary-btn" onClick={resetAttackHighlight}>Reset Highlight</button>
+          </div>
+
+          {attackError ? <p className="form-message error" role="alert">{attackError}</p> : null}
+
+          {attackPaths ? (
+            <div className="attack-results">
+              <h3>Entry: {attackPaths.entry_asset} → Target: {attackPaths.target_asset}</h3>
+              {attackPaths.path_count === 0 ? (
+                <p>No eligible path exists between the selected assets under the current connection constraints.</p>
+              ) : (
+                <>
+                  <p>{attackPaths.path_count} possible path(s). Shortest: {attackPaths.shortest_path || 'none'}.</p>
+                  <div className="path-list">
+                    {attackPaths.paths.map((path) => (
+                      <button
+                        type="button"
+                        key={path.path_id}
+                        className={`path-card${selectedPathId === path.path_id ? ' selected' : ''}`}
+                        onClick={() => selectAttackPath(path.path_id)}
+                      >
+                        <strong>{path.path_id} — {path.hop_count} hop(s) — risk {path.path_risk}/100</strong>
+                        <span>{path.asset_names.join(' → ')}</span>
+                        <small>{path.explanation}</small>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : null}
+
+          {propagation ? (
+            <div className="propagation-results">
+              <h3>Hypothetical compromise from {propagation.starting_asset}</h3>
+              <p><b>{propagation.total_affected_assets}</b> affected assets • depth {propagation.propagation_depth} • aggregate risk {propagation.aggregate_risk}/100</p>
+              <p>Highest-risk affected asset: {propagation.highest_risk_asset_name} ({propagation.highest_risk_asset})</p>
+              <p>Propagation order: {propagation.propagation_order.join(' → ')}</p>
+              <p>{propagation.explanation}</p>
+              <small>{propagation.assumptions.join(' ')}</small>
+            </div>
+          ) : null}
         </section>
 
         <section className="twin-actions" aria-label="Network twin actions">
