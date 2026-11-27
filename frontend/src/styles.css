@@ -112,3 +112,36 @@ footer { position: absolute; bottom: 28px; left: max(48px, calc((100% - 1224px) 
   .twin-toolbar { align-items: flex-start; }
   .asset-details div { grid-template-columns: 1fr; gap: 4px; }
 }
+
+.risk-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+.risk-summary span { padding: 8px 10px; border: 1px solid rgba(204,239,228,.12); border-radius: 4px; color: #a9bfba; font-size: 11px; background: rgba(7,27,34,.55); }
+.risk-summary span b { color: #edf8f5; }
+.risk-summary-level.high { color: #ffad96 !important; }
+.risk-summary-level.medium { color: #f0c478 !important; }
+.risk-summary-level.low { color: #8ee6d2 !important; }
+.risk-summary-level.unknown { color: #9ab7b0 !important; }
+.security-panel { max-height: 520px; overflow-y: auto; }
+.security-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(204,239,228,.12); }
+.security-section h3 { margin: 0 0 8px; font-size: 14px; }
+.security-section p { color: #b8cbc5; font-size: 12px; line-height: 1.5; }
+.security-heading { display: flex; align-items: center; justify-content: space-between; }
+.risk-badge, .status-badge { display: inline-block; margin-left: 6px; padding: 2px 6px; border-radius: 3px; font: 9px 'DM Mono', monospace; text-transform: uppercase; }
+.risk-badge.high, .status-badge.confirmed { color: #ffad96; background: rgba(237,139,116,.12); }
+.risk-badge.medium, .status-badge.manual { color: #f0c478; background: rgba(240,196,120,.12); }
+.risk-badge.low, .status-badge.resolved { color: #8ee6d2; background: rgba(76,200,176,.12); }
+.status-badge.potential { color: #f0c478; background: rgba(240,196,120,.12); }
+.risk-factors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.risk-factors span { color: #b8cbc5; font-size: 11px; }
+.vulnerability-card { margin: 8px 0; padding: 9px; border: 1px solid rgba(204,239,228,.12); border-radius: 4px; }
+.vulnerability-title { display: flex; justify-content: space-between; gap: 8px; }
+.vulnerability-meta { display: flex; flex-wrap: wrap; gap: 8px; color: #9ab7b0; font-size: 10px; }
+.vulnerability-actions { display: flex; gap: 8px; margin-top: 8px; }
+.secondary-btn.danger { color: #ffad96; }
+.graph-node-card.risk-high { border-color: #ed8b74; box-shadow: 0 0 24px rgba(237,139,116,.12); }
+.graph-node-card.risk-medium { border-color: #f0c478; box-shadow: 0 0 24px rgba(240,196,120,.1); }
+.graph-node-card.risk-low { border-color: #4cc8b0; }
+.graph-node-card.risk-unknown { border-color: #7e99b2; }
+.risk-text.high { color: #ffad96; }
+.risk-text.medium { color: #f0c478; }
+.risk-text.low { color: #8ee6d2; }
+.risk-text.unknown { color: #9ab7b0; }

@@ -9,8 +9,15 @@ services:
       NEO4J_USER: ${NEO4J_USER:-neo4j}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD:-netra_password}
       FRONTEND_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      NVD_API_KEY: ${NVD_API_KEY:-}
+      NVD_API_BASE_URL: ${NVD_API_BASE_URL:-https://services.nvd.nist.gov/rest/json/cves/2.0}
+      NVD_TIMEOUT_SECONDS: ${NVD_TIMEOUT_SECONDS:-15}
+      NVD_CACHE_TTL_HOURS: ${NVD_CACHE_TTL_HOURS:-24}
     ports:
       - "127.0.0.1:8000:8000"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     depends_on:
       neo4j:
         condition: service_healthy
@@ -103,7 +110,7 @@ networks:
   public_net: {}
   app_net: { internal: true }
   data_net: { internal: true }
-  twin_net: { internal: true }
+  twin_net: {}
 volumes:
   source_db_data: {}
   neo4j_data: {}

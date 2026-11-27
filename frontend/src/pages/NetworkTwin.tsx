@@ -7,10 +7,12 @@ import {
   createAsset,
   createConnection,
   getGraph,
+  getRiskSummary,
   type Asset,
   type AssetCreateInput,
   type GraphEdge,
   type GraphNode,
+  type RiskSummary,
 } from '../services/api';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
@@ -82,6 +84,7 @@ export default function NetworkTwin() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [riskSummary, setRiskSummary] = useState<RiskSummary | null>(null);
 
   const [assetForm, setAssetForm] = useState<AssetFormState>(initialAssetForm);
   const [connectionForm, setConnectionForm] = useState<ConnectionFormState>(initialConnectionForm);
@@ -101,7 +104,11 @@ export default function NetworkTwin() {
     setErrorMessage(null);
 
     try {
-      const graph = await getGraph();
+      const [graph, summary] = await Promise.all([
+        getGraph(),
+        getRiskSummary().catch(() => null),
+      ]);
+      setRiskSummary(summary);
       const nextNodes = Array.isArray(graph.nodes) ? graph.nodes : [];
       const nextEdges = Array.isArray(graph.edges) ? graph.edges : [];
       setNodes(nextNodes);
@@ -242,6 +249,18 @@ export default function NetworkTwin() {
             </button>
           </div>
         </div>
+        {riskSummary ? (
+          <section className="risk-summary" aria-label="Infrastructure risk summary">
+            <span><b>{riskSummary.total_assets}</b> assets</span>
+            <span><b>{riskSummary.distinct_associated_cves}</b> distinct CVEs</span>
+            <span><b>{riskSummary.confirmed_vulnerability_assets}</b> confirmed-vulnerability assets</span>
+            <span><b>{riskSummary.high_risk_assets}</b> high</span>
+            <span><b>{riskSummary.medium_risk_assets}</b> medium</span>
+            <span><b>{riskSummary.low_risk_assets}</b> low</span>
+            <span><b>{riskSummary.unknown_risk_assets}</b> unknown risk</span>
+            <span>Overall <b className={`risk-summary-level ${riskSummary.overall_infrastructure_risk}`}>{riskSummary.overall_infrastructure_risk}</b></span>
+          </section>
+        ) : null}
 
         <section className="graph-workspace" aria-label="Network topology workspace">
           <div className="graph-panel">
@@ -278,7 +297,11 @@ export default function NetworkTwin() {
             ) : null}
           </div>
 
-          <AssetPanel asset={selectedAsset} onClose={() => setSelectedAssetId(null)} />
+          <AssetPanel
+            asset={selectedAsset}
+            onClose={() => setSelectedAssetId(null)}
+            onAssetUpdated={() => void loadGraph(true)}
+          />
         </section>
 
         <section className="twin-actions" aria-label="Network twin actions">

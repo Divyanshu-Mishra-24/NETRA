@@ -9,6 +9,18 @@ export interface Asset {
   exposure: string | null;
   criticality: string | null;
   source?: string | null;
+  software?: SoftwareItem[];
+  risk_score?: number | null;
+  risk_level?: string | null;
+  risk_calculated_at?: string | null;
+}
+
+export interface SoftwareItem {
+  product: string;
+  version?: string | null;
+  source?: string;
+  confidence?: number;
+  evidence?: string;
 }
 
 export interface AssetCreateInput {
@@ -184,4 +196,127 @@ export function createConnection(sourceId: string, payload: CreateConnectionInpu
 
 export function deleteAsset(id: string) {
   return request<void>(`/assets/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export interface VulnerabilityDetails {
+  cve_id: string;
+  description?: string | null;
+  severity?: string | null;
+  cvss_score?: number | null;
+  cvss_version?: string | null;
+  cvss_vector?: string | null;
+  published_at?: string | null;
+  last_modified_at?: string | null;
+  source: string;
+  references: string[];
+  last_fetched_at?: string | null;
+  rejected: boolean;
+}
+
+export interface AssetVulnerability {
+  cve_id: string;
+  vulnerability: VulnerabilityDetails;
+  match_type: 'confirmed' | 'potential' | 'manual' | 'rejected' | 'resolved';
+  confidence: number;
+  status: string;
+  matched_product?: string | null;
+  matched_version?: string | null;
+  evidence?: string | null;
+  added_at?: string | null;
+}
+
+export interface ExposureAssessment {
+  exposure_level: 'public' | 'internal' | 'restricted' | 'unknown';
+  evidence: string[];
+  uncertainty: string[];
+}
+
+export interface RiskResult {
+  asset_id: string;
+  overall_score: number;
+  risk_level: 'low' | 'medium' | 'high';
+  vulnerability_contribution: number;
+  exposure_contribution: number;
+  connectivity_contribution: number;
+  criticality_contribution: number;
+  factor_scores: Record<string, number>;
+  explanation: string;
+  evidence: string[];
+  uncertainty: string[];
+  formula_version: string;
+  calculated_at: string;
+}
+
+export interface RiskSummary {
+  total_assets: number;
+  confirmed_vulnerability_assets: number;
+  distinct_associated_cves: number;
+  high_risk_assets: number;
+  medium_risk_assets: number;
+  low_risk_assets: number;
+  unknown_risk_assets: number;
+  overall_infrastructure_risk: 'low' | 'medium' | 'high' | 'unknown';
+  aggregation_method: string;
+}
+
+export function searchVulnerabilities(keyword: string) {
+  return request<{ total_results: number; items: VulnerabilityDetails[] }>(
+    `/vulnerabilities/search?keyword=${encodeURIComponent(keyword)}&results_per_page=20`,
+  );
+}
+
+export function getAssetVulnerabilities(assetId: string) {
+  return request<AssetVulnerability[]>(`/assets/${encodeURIComponent(assetId)}/vulnerabilities`);
+}
+
+export function attachAssetVulnerability(assetId: string, payload: {
+  cve_id: string;
+  evidence?: string;
+  match_type: 'confirmed' | 'potential' | 'manual';
+  status: 'accepted' | 'potential' | 'resolved' | 'rejected';
+  matched_product?: string;
+  matched_version?: string;
+}) {
+  return request<AssetVulnerability>(`/assets/${encodeURIComponent(assetId)}/vulnerabilities`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAssetVulnerability(assetId: string, cveId: string, payload: {
+  status: 'accepted' | 'potential' | 'resolved' | 'rejected';
+  evidence?: string;
+  match_type?: 'confirmed' | 'potential' | 'manual' | 'rejected' | 'resolved';
+}) {
+  return request<AssetVulnerability>(
+    `/assets/${encodeURIComponent(assetId)}/vulnerabilities/${encodeURIComponent(cveId)}`,
+    { method: 'PATCH', body: JSON.stringify(payload) },
+  );
+}
+
+export function removeAssetVulnerability(assetId: string, cveId: string) {
+  return request<void>(
+    `/assets/${encodeURIComponent(assetId)}/vulnerabilities/${encodeURIComponent(cveId)}`,
+    { method: 'DELETE' },
+  );
+}
+
+export function refreshAssetVulnerabilities(assetId: string) {
+  return request<AssetVulnerability[]>(`/assets/${encodeURIComponent(assetId)}/vulnerabilities/refresh`, { method: 'POST' });
+}
+
+export function getAssetExposure(assetId: string) {
+  return request<ExposureAssessment>(`/assets/${encodeURIComponent(assetId)}/exposure`);
+}
+
+export function getAssetRisk(assetId: string) {
+  return request<RiskResult>(`/assets/${encodeURIComponent(assetId)}/risk`);
+}
+
+export function recalculateAssetRisk(assetId: string) {
+  return request<RiskResult>(`/assets/${encodeURIComponent(assetId)}/risk/recalculate`, { method: 'POST' });
+}
+
+export function getRiskSummary() {
+  return request<RiskSummary>('/risk/summary');
 }

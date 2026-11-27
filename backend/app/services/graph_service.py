@@ -45,6 +45,10 @@ def _asset_from_node(node: dict[str, Any]) -> Asset:
         exposure=node.get("exposure"),
         criticality=node.get("criticality"),
         source=node.get("source"),
+        software=node.get("software") or [],
+        risk_score=node.get("risk_score"),
+        risk_level=node.get("risk_level"),
+        risk_calculated_at=node.get("risk_calculated_at"),
     )
 
 
@@ -63,6 +67,12 @@ def _connection_from_rel(source_id: str, target_id: str, rel: dict[str, Any]) ->
 def ensure_constraints(session: Any) -> None:
     session.run(
         "CREATE CONSTRAINT asset_id IF NOT EXISTS FOR (asset:Asset) REQUIRE asset.id IS UNIQUE"
+    )
+    session.run(
+        "CREATE CONSTRAINT vulnerability_cve_id IF NOT EXISTS FOR (v:Vulnerability) REQUIRE v.cve_id IS UNIQUE"
+    )
+    session.run(
+        "CREATE CONSTRAINT software_id IF NOT EXISTS FOR (s:Software) REQUIRE s.id IS UNIQUE"
     )
 
 
@@ -106,6 +116,7 @@ def create_asset(session: Any, payload: AssetCreate) -> Asset:
             asset.ports = $ports,
             asset.exposure = $exposure,
             asset.criticality = $criticality,
+            asset.software = $software,
             asset.source = 'api'
         RETURN asset
         """,
