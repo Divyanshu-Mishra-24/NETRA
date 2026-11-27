@@ -320,3 +320,99 @@ export function recalculateAssetRisk(assetId: string) {
 export function getRiskSummary() {
   return request<RiskSummary>('/risk/summary');
 }
+
+export interface AttackPathEdge {
+  id: string;
+  source: string;
+  target: string;
+  protocol?: string | null;
+  port?: number | null;
+  allowed: boolean;
+  evidence?: string | null;
+}
+
+export interface AttackPath {
+  path_id: string;
+  assets: string[];
+  asset_names: string[];
+  edge_ids: string[];
+  edges: AttackPathEdge[];
+  hop_count: number;
+  path_risk: number;
+  ranking_method: string;
+  explanation: string;
+  traversal_assumptions: string[];
+}
+
+export interface AttackPathResponse {
+  entry_asset: string;
+  target_asset: string;
+  path_count: number;
+  paths: AttackPath[];
+  truncated: boolean;
+  shortest_path: string | null;
+}
+
+export interface PropagationResult {
+  scenario_id: string;
+  starting_asset: string;
+  affected_asset_ids: string[];
+  affected_asset_names: string[];
+  propagation_order: string[];
+  propagation_depth: number;
+  traversed_connections: Array<{
+    source: string;
+    target: string;
+    edge_id: string;
+    protocol?: string | null;
+    port?: number | null;
+    depth: number;
+    predecessor: string;
+  }>;
+  total_affected_assets: number;
+  aggregate_risk: number;
+  impact_indicator: number;
+  highest_risk_asset: string;
+  highest_risk_asset_name: string;
+  assumptions: string[];
+  explanation: string;
+  calculated_at: string;
+}
+
+export function getAttackPaths(entryAsset: string, targetAsset: string, maxDepth = 6, maxPaths = 20) {
+  const params = new URLSearchParams({
+    from: entryAsset,
+    to: targetAsset,
+    max_depth: String(maxDepth),
+    max_paths: String(maxPaths),
+  });
+  return request<AttackPathResponse>(`/graph/paths?${params.toString()}`);
+}
+
+export function getShortestAttackPath(entryAsset: string, targetAsset: string, maxDepth = 6) {
+  const params = new URLSearchParams({
+    from: entryAsset,
+    to: targetAsset,
+    max_depth: String(maxDepth),
+  });
+  return request<AttackPathResponse>(`/graph/shortest-path?${params.toString()}`);
+}
+
+export function simulateCompromise(startingAsset: string, maxDepth = 12) {
+  return request<PropagationResult>('/simulate', {
+    method: 'POST',
+    body: JSON.stringify({ starting_asset: startingAsset, max_depth: maxDepth }),
+  });
+}
+
+export function getReachableAssets(assetId: string, maxDepth = 12) {
+  return request<{
+    starting_asset: string;
+    reachable_asset_ids: string[];
+    reachable_asset_names: string[];
+    traversed_connections: PropagationResult['traversed_connections'];
+    maximum_depth: number;
+    aggregate_risk: number;
+    assumptions: string[];
+  }>(`/graph/reachable/${encodeURIComponent(assetId)}?max_depth=${maxDepth}`);
+}
